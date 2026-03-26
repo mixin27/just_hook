@@ -255,3 +255,249 @@ SearchState useSearch({String? initialText}) {
 
   return SearchState(controller: controller, text: text.value);
 }
+
+/// Returns the previous value passed into [usePrevious].
+/// On the first build, it returns null.
+T? usePrevious<T>(T value) {
+  return use(_PreviousHook<T>(value));
+}
+
+class _PreviousHook<T> extends Hook<T?> {
+  const _PreviousHook(this.value);
+  final T value;
+
+  @override
+  _PreviousHookState<T> createState() => _PreviousHookState<T>();
+}
+
+class _PreviousHookState<T> extends HookState<T?, _PreviousHook<T>> {
+  T? _previous;
+
+  @override
+  void initHook() {
+    super.initHook();
+    _previous = null;
+  }
+
+  @override
+  void didUpdateHook(_PreviousHook<T> oldHook) {
+    super.didUpdateHook(oldHook);
+    _previous = oldHook.value;
+  }
+
+  @override
+  T? build(BuildContext context) => _previous;
+}
+
+/// Creates a [ScrollController] that is automatically disposed.
+ScrollController useScrollController({
+  double initialScrollOffset = 0.0,
+  bool keepScrollOffset = true,
+  String? debugLabel,
+  List<Object?>? keys,
+}) {
+  return use(_ScrollControllerHook(
+    initialScrollOffset: initialScrollOffset,
+    keepScrollOffset: keepScrollOffset,
+    debugLabel: debugLabel,
+    keys: keys,
+  ));
+}
+
+class _ScrollControllerHook extends Hook<ScrollController> {
+  const _ScrollControllerHook({
+    required this.initialScrollOffset,
+    required this.keepScrollOffset,
+    this.debugLabel,
+    super.keys,
+  });
+
+  final double initialScrollOffset;
+  final bool keepScrollOffset;
+  final String? debugLabel;
+
+  @override
+  _ScrollControllerHookState createState() => _ScrollControllerHookState();
+}
+
+class _ScrollControllerHookState extends HookState<ScrollController, _ScrollControllerHook> {
+  late ScrollController _controller;
+
+  @override
+  void initHook() {
+    super.initHook();
+    _controller = ScrollController(
+      initialScrollOffset: hook.initialScrollOffset,
+      keepScrollOffset: hook.keepScrollOffset,
+      debugLabel: hook.debugLabel,
+    );
+  }
+
+  @override
+  void didUpdateHook(_ScrollControllerHook oldHook) {
+    super.didUpdateHook(oldHook);
+    if (HookKeys.didKeysChange(oldHook.keys, hook.keys)) {
+      _controller.dispose();
+      _controller = ScrollController(
+        initialScrollOffset: hook.initialScrollOffset,
+        keepScrollOffset: hook.keepScrollOffset,
+        debugLabel: hook.debugLabel,
+      );
+    }
+  }
+
+  @override
+  ScrollController build(BuildContext context) => _controller;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+}
+
+/// Creates a [PageController] that is automatically disposed.
+PageController usePageController({
+  int initialPage = 0,
+  bool keepPage = true,
+  double viewportFraction = 1.0,
+  List<Object?>? keys,
+}) {
+  return use(_PageControllerHook(
+    initialPage: initialPage,
+    keepPage: keepPage,
+    viewportFraction: viewportFraction,
+    keys: keys,
+  ));
+}
+
+class _PageControllerHook extends Hook<PageController> {
+  const _PageControllerHook({
+    required this.initialPage,
+    required this.keepPage,
+    required this.viewportFraction,
+    super.keys,
+  });
+
+  final int initialPage;
+  final bool keepPage;
+  final double viewportFraction;
+
+  @override
+  _PageControllerHookState createState() => _PageControllerHookState();
+}
+
+class _PageControllerHookState extends HookState<PageController, _PageControllerHook> {
+  late PageController _controller;
+
+  @override
+  void initHook() {
+    super.initHook();
+    _controller = PageController(
+      initialPage: hook.initialPage,
+      keepPage: hook.keepPage,
+      viewportFraction: hook.viewportFraction,
+    );
+  }
+
+  @override
+  void didUpdateHook(_PageControllerHook oldHook) {
+    super.didUpdateHook(oldHook);
+    if (HookKeys.didKeysChange(oldHook.keys, hook.keys)) {
+      _controller.dispose();
+      _controller = PageController(
+        initialPage: hook.initialPage,
+        keepPage: hook.keepPage,
+        viewportFraction: hook.viewportFraction,
+      );
+    }
+  }
+
+  @override
+  PageController build(BuildContext context) => _controller;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+}
+
+/// Creates a [FocusNode] that is automatically disposed.
+FocusNode useFocusNode({
+  String? debugLabel,
+  bool canRequestFocus = true,
+  bool skipTraversal = false,
+  bool descendantsAreFocusable = true,
+  bool descendantsAreTraversable = true,
+  List<Object?>? keys,
+}) {
+  return use(_FocusNodeHook(
+    debugLabel: debugLabel,
+    canRequestFocus: canRequestFocus,
+    skipTraversal: skipTraversal,
+    descendantsAreFocusable: descendantsAreFocusable,
+    descendantsAreTraversable: descendantsAreTraversable,
+    keys: keys,
+  ));
+}
+
+class _FocusNodeHook extends Hook<FocusNode> {
+  const _FocusNodeHook({
+    this.debugLabel,
+    this.canRequestFocus = true,
+    this.skipTraversal = false,
+    this.descendantsAreFocusable = true,
+    this.descendantsAreTraversable = true,
+    super.keys,
+  });
+
+  final String? debugLabel;
+  final bool canRequestFocus;
+  final bool skipTraversal;
+  final bool descendantsAreFocusable;
+  final bool descendantsAreTraversable;
+
+  @override
+  _FocusNodeHookState createState() => _FocusNodeHookState();
+}
+
+class _FocusNodeHookState extends HookState<FocusNode, _FocusNodeHook> {
+  late FocusNode _focusNode;
+
+  @override
+  void initHook() {
+    super.initHook();
+    _focusNode = FocusNode(
+      debugLabel: hook.debugLabel,
+      canRequestFocus: hook.canRequestFocus,
+      skipTraversal: hook.skipTraversal,
+      descendantsAreFocusable: hook.descendantsAreFocusable,
+      descendantsAreTraversable: hook.descendantsAreTraversable,
+    );
+  }
+
+  @override
+  void didUpdateHook(_FocusNodeHook oldHook) {
+    super.didUpdateHook(oldHook);
+    if (HookKeys.didKeysChange(oldHook.keys, hook.keys)) {
+      _focusNode.dispose();
+      _focusNode = FocusNode(
+        debugLabel: hook.debugLabel,
+        canRequestFocus: hook.canRequestFocus,
+        skipTraversal: hook.skipTraversal,
+        descendantsAreFocusable: hook.descendantsAreFocusable,
+        descendantsAreTraversable: hook.descendantsAreTraversable,
+      );
+    }
+  }
+
+  @override
+  FocusNode build(BuildContext context) => _focusNode;
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+}

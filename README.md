@@ -19,6 +19,13 @@ Provides building blocks to compose reusable behavior and state logic.
 - `useTextEditingController`: Creates an automatically disposable `TextEditingController`.
 - `useSearch`: Easily builds a text editing controller and text state listener for building search UIs.
 
+### Controller & Utility Hooks
+
+- `usePrevious`: Returns the previous value given to it, useful for comparing previous vs new state.
+- `useScrollController`: Creates an automatically disposable `ScrollController`.
+- `usePageController`: Creates an automatically disposable `PageController`.
+- `useFocusNode`: Creates an automatically disposable `FocusNode`.
+
 ## Getting started
 
 Add `just_hook` to your `pubspec.yaml`:

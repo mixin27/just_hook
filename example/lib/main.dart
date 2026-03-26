@@ -28,9 +28,14 @@ class MyHookPage extends HookWidget {
     // Advanced search hook automatically gives controller and string text
     final search = useSearch(initialText: 'Hooked Search');
 
+    // Controller hooks
+    final focusNode = useFocusNode();
+    final scrollController = useScrollController();
+
     // Mocks a stream ticking every second
     final stream = useMemoized(() {
-      return Stream<int>.periodic(const Duration(seconds: 1), (i) => i).take(10);
+      return Stream<int>.periodic(const Duration(seconds: 1), (i) => i)
+          .take(10);
     }, []);
     final streamSnapshot = useStream(stream);
 
@@ -44,37 +49,62 @@ class MyHookPage extends HookWidget {
       appBar: AppBar(title: const Text('just_hook Examples')),
       body: Center(
         child: SingleChildScrollView(
+          controller: scrollController,
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('useSearch Example:', style: Theme.of(context).textTheme.titleLarge),
-              TextField(
-                controller: search.controller,
-                decoration: const InputDecoration(border: OutlineInputBorder(), hintText: 'Type something...'),
+              Text('useSearch & useFocusNode Example:',
+                  style: Theme.of(context).textTheme.titleLarge),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: search.controller,
+                      focusNode: focusNode,
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: 'Type something...'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () => focusNode.requestFocus(),
+                    child: const Text('Focus'),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
-              Text('You typed: ${search.text}', style: const TextStyle(fontWeight: FontWeight.bold)),
-              
+              Text('You typed: ${search.text}',
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
               const Divider(height: 48),
-
-              Text('useStream Example:', style: Theme.of(context).textTheme.titleLarge),
-              Text('Ticks: ${streamSnapshot.hasData ? streamSnapshot.data : 'Waiting...'}'),
-
+              Text('useStream Example:',
+                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                  'Ticks: ${streamSnapshot.hasData ? streamSnapshot.data : "Waiting..."}'),
               const Divider(height: 48),
-
-              Text('useFuture Example (Refreshes on Fab Tap):', style: Theme.of(context).textTheme.titleLarge),
+              Text('useFuture Example (Refreshes on Fab Tap):',
+                  style: Theme.of(context).textTheme.titleLarge),
               if (futureSnapshot.connectionState == ConnectionState.waiting)
                 const CircularProgressIndicator()
               else if (futureSnapshot.hasData)
                 Text('Result: ${futureSnapshot.data}')
               else
                 const Text('Waiting...'),
-
               const Divider(height: 48),
-
-              Text('useState Example:', style: Theme.of(context).textTheme.titleLarge),
-              Text('Button taps: ${counter.value}', style: const TextStyle(fontSize: 24)),
+              Text('useState Example:',
+                  style: Theme.of(context).textTheme.titleLarge),
+              Text('Button taps: ${counter.value}',
+                  style: const TextStyle(fontSize: 24)),
+              const SizedBox(height: 400),
+              Text('Scroll to top...',
+                  style: Theme.of(context).textTheme.titleLarge),
+              ElevatedButton(
+                onPressed: () => scrollController.animateTo(0,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOut),
+                child: const Text('Top'),
+              ),
             ],
           ),
         ),
