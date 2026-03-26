@@ -128,6 +128,14 @@ class MyHookPage extends HookWidget {
                 },
                 child: const Text('View Form Example'),
               ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (c) => const QueryAndAnimationExample()));
+                },
+                child: const Text('View HTTP & Animation Example'),
+              ),
             ],
           ),
         ),
@@ -135,6 +143,92 @@ class MyHookPage extends HookWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => counter.value++,
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class QueryAndAnimationExample extends HookWidget {
+  const QueryAndAnimationExample({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // 1. Animation Controller Hook
+    final animationController = useAnimationController(
+      // Animation completes in 2 seconds
+      duration: const Duration(seconds: 2),
+    );
+
+    // Memos animation to play whenever the widget is mounted or toggled
+    useEffect(() {
+      animationController.repeat(reverse: true);
+      return null;
+    }, const []);
+    
+    // Animate the size according to the controller
+    final animationValue = useValueListenable(animationController);
+
+    // 2. HTTP Query Hook Mock
+    final fetcher = useMemoized(() => () async {
+      await Future.delayed(const Duration(seconds: 1));
+      // Simple random behavior to simulate a REST API
+      if (DateTime.now().second % 4 == 0) {
+        throw Exception('Network error');
+      }
+      return 'Server Data: \${DateTime.now().toIso8601String()}';
+    }, []);
+
+    final httpQuery = useQuery<String>(
+      fetcher: fetcher,
+    );
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Animation & HTTP Query')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Animation Controller Hook', style: TextStyle(fontSize: 20)),
+            const SizedBox(height: 20),
+            Container(
+              width: 100 * (1.0 + animationValue),
+              height: 100 * (1.0 + animationValue),
+              color: Colors.blueAccent,
+            ),
+            
+            const Divider(height: 64),
+            
+            const Text('HTTP useQuery Hook', style: TextStyle(fontSize: 20)),
+            const SizedBox(height: 20),
+            
+            if (httpQuery.isLoading)
+              const CircularProgressIndicator()
+            else if (httpQuery.error != null)
+              Column(
+                children: [
+                   const Text('Error: \${httpQuery.error}', style: TextStyle(color: Colors.red)),
+                   const SizedBox(height: 8),
+                   ElevatedButton(
+                     onPressed: httpQuery.refetch,
+                     child: const Text('Retry'),
+                   ),
+                ]
+              )
+            else
+              Column(
+                children: [
+                   Text(httpQuery.data ?? 'No Data'),
+                   const SizedBox(height: 16),
+                   ElevatedButton(
+                     onPressed: httpQuery.isFetching ? null : httpQuery.refetch,
+                     child: httpQuery.isFetching
+                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Text('Refetch'),
+                   ),
+                ]
+              )
+          ],
+        ),
       ),
     );
   }
