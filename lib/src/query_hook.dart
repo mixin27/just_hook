@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import 'framework.dart';
+import 'advanced_hooks.dart';
 
 /// The state of a [useQuery] request.
 class QueryState<T> {
@@ -139,4 +140,134 @@ class _QueryHookState<T> extends HookState<QueryState<T>, _QueryHook<T>> {
       refetch: _refetch,
     );
   }
+}
+
+/// The state of a [useMutation] request.
+class MutationState<TData, TVariables> {
+  const MutationState({
+    this.data,
+    this.error,
+    required this.isMutating,
+    required this.mutate,
+  });
+
+  final TData? data;
+  final Object? error;
+  final bool isMutating;
+  final Future<TData?> Function(TVariables variables) mutate;
+}
+
+/// A hook tailored for executing operations that modify server-side data (like REST POST/PUT or GraphQL Mutations).
+/// Exposes [isMutating] alongside the generic [mutate] dispatcher.
+MutationState<TData, TVariables> useMutation<TData, TVariables>({
+  required Future<TData> Function(TVariables variables) mutationFn,
+  void Function(TData data, TVariables variables)? onSuccess,
+  void Function(Object error, TVariables variables)? onError,
+  void Function(TVariables variables)? onMutate,
+}) {
+  return use(_MutationHook<TData, TVariables>(
+    mutationFn: mutationFn,
+    onSuccess: onSuccess,
+    onError: onError,
+    onMutate: onMutate,
+  ));
+}
+
+class _MutationHook<TData, TVariables> extends Hook<MutationState<TData, TVariables>> {
+  const _MutationHook({
+    required this.mutationFn,
+    this.onSuccess,
+    this.onError,
+    this.onMutate,
+  });
+
+  final Future<TData> Function(TVariables variables) mutationFn;
+  final void Function(TData data, TVariables variables)? onSuccess;
+  final void Function(Object error, TVariables variables)? onError;
+  final void Function(TVariables variables)? onMutate;
+
+  @override
+  _MutationHookState<TData, TVariables> createState() => _MutationHookState<TData, TVariables>();
+}
+
+class _MutationHookState<TData, TVariables> 
+    extends HookState<MutationState<TData, TVariables>, _MutationHook<TData, TVariables>> {
+  TData? _data;
+  Object? _error;
+  bool _isMutating = false;
+  bool _isDisposed = false;
+
+  Future<TData?> _mutate(TVariables variables) async {
+    setState(() {
+      _isMutating = true;
+      _error = null;
+    });
+
+    hook.onMutate?.call(variables);
+
+    try {
+      final result = await hook.mutationFn(variables);
+      if (_isDisposed) return null;
+
+      setState(() {
+        _data = result;
+        _isMutating = false;
+      });
+
+      hook.onSuccess?.call(result, variables);
+      return result;
+    } catch (e) {
+      if (_isDisposed) return null;
+
+      setState(() {
+        _error = e;
+        _isMutating = false;
+      });
+
+      hook.onError?.call(e, variables);
+      return null;
+    }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
+  }
+
+  @override
+  MutationState<TData, TVariables> build(BuildContext context) {
+    return MutationState<TData, TVariables>(
+      data: _data,
+      error: _error,
+      isMutating: _isMutating,
+      mutate: _mutate,
+    );
+  }
+}
+
+/// The state of a [useSubscription] request.
+class SubscriptionState<T> {
+  const SubscriptionState({
+    required this.data,
+    required this.error,
+    required this.isConnected,
+  });
+
+  final T? data;
+  final Object? error;
+  
+  /// True if the stream is actively delivering events.
+  final bool isConnected;
+}
+
+/// A hook designed to subscribe to real-time APIs like WebSockets or GraphQL Subscriptions.
+/// It wraps around an underlying stream but exposes state semantics identical to [useQuery].
+SubscriptionState<T> useSubscription<T>(Stream<T> stream, {T? initialData}) {
+  final snapshot = useStream(stream, initialData: initialData);
+  return SubscriptionState<T>(
+    data: snapshot.data,
+    error: snapshot.error,
+    isConnected: snapshot.connectionState == ConnectionState.active,
+  );
 }
