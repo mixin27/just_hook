@@ -5,8 +5,13 @@ import 'framework.dart';
 import 'hooks.dart';
 
 /// Creates a [TextEditingController] that will be disposed automatically.
-/// Changing the [keys] respects hook lifecycle but recreates the controller.
-/// Changes to [text] will NOT update the controller on rebuilds, it's just initial.
+///
+/// If [keys] are provided, the controller is recreated whenever [keys] change.
+/// The [text] parameter sets the initial text for the controller.
+///
+/// ```dart
+/// final controller = useTextEditingController(text: 'Initial text');
+/// ```
 TextEditingController useTextEditingController({
   String? text,
   List<Object?>? keys,
@@ -54,7 +59,11 @@ class _TextEditingControllerHookState
 }
 
 /// Subscribes to a [Future] and returns its current state as an [AsyncSnapshot].
-/// If [future] changes, it re-subscribes.
+///
+/// If [future] changes, the hook will unsubscribe from the previous future
+/// and subscribe to the new one.
+///
+/// The [initialData] is used as the default value while the future is loading.
 AsyncSnapshot<T> useFuture<T>(
   Future<T>? future, {
   T? initialData,
@@ -141,7 +150,11 @@ class _FutureHookState<T> extends HookState<AsyncSnapshot<T>, _FutureHook<T>> {
 }
 
 /// Subscribes to a [Stream] and returns its current state as an [AsyncSnapshot].
-/// If [stream] changes, it re-subscribes.
+///
+/// If [stream] changes, the hook will unsubscribe from the previous stream
+/// and subscribe to the new one.
+///
+/// The [initialData] is used as the default data before the stream emits anything.
 AsyncSnapshot<T> useStream<T>(
   Stream<T>? stream, {
   T? initialData,
@@ -233,9 +246,14 @@ class _StreamHookState<T> extends HookState<AsyncSnapshot<T>, _StreamHook<T>> {
 /// It creates a [TextEditingController], attaches a listener, 
 /// and returns the current text.
 /// It rebuilds the widget whenever the text changes.
+/// The state returned by [useSearch].
 class SearchState {
   SearchState({required this.controller, required this.text});
+
+  /// The [TextEditingController] managed by the hook.
   final TextEditingController controller;
+
+  /// The current text value of the controller.
   final String text;
 }
 
@@ -256,8 +274,14 @@ SearchState useSearch({String? initialText}) {
   return SearchState(controller: controller, text: text.value);
 }
 
-/// Returns the previous value passed into [usePrevious].
-/// On the first build, it returns null.
+/// Returns the previous value given to it on the previous build.
+///
+/// On the first build, it returns `null`.
+///
+/// ```dart
+/// final count = useState(0);
+/// final previousCount = usePrevious(count.value);
+/// ```
 T? usePrevious<T>(T value) {
   return use(_PreviousHook<T>(value));
 }
@@ -289,7 +313,9 @@ class _PreviousHookState<T> extends HookState<T?, _PreviousHook<T>> {
   T? build(BuildContext context) => _previous;
 }
 
-/// Creates a [ScrollController] that is automatically disposed.
+/// Creates a [ScrollController] that will be disposed automatically.
+///
+/// If [keys] are provided, the controller is recreated whenever [keys] change.
 ScrollController useScrollController({
   double initialScrollOffset = 0.0,
   bool keepScrollOffset = true,
@@ -356,7 +382,9 @@ class _ScrollControllerHookState extends HookState<ScrollController, _ScrollCont
   }
 }
 
-/// Creates a [PageController] that is automatically disposed.
+/// Creates a [PageController] that will be disposed automatically.
+///
+/// If [keys] are provided, the controller is recreated whenever [keys] change.
 PageController usePageController({
   int initialPage = 0,
   bool keepPage = true,
@@ -423,7 +451,9 @@ class _PageControllerHookState extends HookState<PageController, _PageController
   }
 }
 
-/// Creates a [FocusNode] that is automatically disposed.
+/// Creates a [FocusNode] that will be disposed automatically.
+///
+/// If [keys] are provided, the [FocusNode] is recreated whenever [keys] change.
 FocusNode useFocusNode({
   String? debugLabel,
   bool canRequestFocus = true,

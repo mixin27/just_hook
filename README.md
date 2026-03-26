@@ -1,6 +1,6 @@
 # just_hook
 
-A lightweight and simple open-source Flutter hooks framework inspired by `flutter_hooks`.
+A lightweight and simple open-source Flutter hooks framework inspired by `flutter_hooks` and `React Hooks`.
 
 ## Features
 
@@ -122,3 +122,12 @@ class _MyHookState extends HookState<int, _MyHook> {
   }
 }
 ```
+
+## Future Plans & Roadmap
+
+The `just_hook` ecosystem is expanding rapidly! Future plans being prepared for subsequent releases include:
+
+- `useAppLifecycleState`: A hook linking global app backgrounding/foregrounding metrics automatically.
+- `useTheme` / `useMediaQuery`: Bind context configurations explicitly through functional variables dynamically.
+- `useStreamController`: Natively bind a reusable stream controller explicitly within the hook context.
+- **Improved Test Suite Coverage**: Adding UI tests alongside the existing stateful `flutter test` matrices.

@@ -8,6 +8,8 @@ import 'framework.dart';
 typedef HookValidator = String? Function(String? value);
 
 /// A controller that manages form state, validation, and submission.
+///
+/// Created and managed by the [useForm] hook.
 class FormController {
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, List<HookValidator>> _validators = {};
@@ -18,7 +20,7 @@ class FormController {
   /// Returns the current validation errors across all fields.
   Map<String, String?> get errors => Map.unmodifiable(_errors);
 
-  /// True if a submission is currently in progress.
+  /// Whether a submission is currently in progress.
   bool get isSubmitting => _isSubmitting;
 
   /// True if there are currently no validation errors.
@@ -115,8 +117,20 @@ class FormController {
   }
 }
 
-/// A hook that provides a [FormController] for effortless form validation
-/// and submission handling. Think of it as a flutter equivalent to React-Hook-Form.
+/// A hook that provides a [FormController] for managing form state.
+///
+/// Features:
+/// - Reactive validation as users type.
+/// - Automatic [TextEditingController] management via [FormController.register].
+/// - Submission state tracking (`isSubmitting`).
+/// - Error mapping and centralized validation.
+///
+/// ```dart
+/// final form = useForm();
+/// final controller = form.register('email', validators: [requiredValidator]);
+///
+/// return TextField(controller: controller, errorText: form.errors['email']);
+/// ```
 FormController useForm() {
   return use(const _FormHook());
 }

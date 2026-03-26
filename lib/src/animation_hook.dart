@@ -3,8 +3,12 @@ import 'package:flutter/widgets.dart';
 
 import 'framework.dart';
 
-/// Creates an automatically disposable [AnimationController].
-/// The internal [HookState] implements [TickerProvider].
+/// Creates an [AnimationController] that will be disposed automatically.
+///
+/// The returned [AnimationController] is tied to the [HookWidget] lifecycle.
+/// It automatically provides a [TickerProvider] (vsync) from the hook state.
+///
+/// If [keys] are provided, the controller is recreated whenever [keys] change.
 AnimationController useAnimationController({
   Duration? duration,
   Duration? reverseDuration,

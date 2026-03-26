@@ -2,8 +2,16 @@ import 'package:flutter/widgets.dart';
 
 import 'framework.dart';
 
-/// Mutable state hook.
-/// It holds a [value] and triggers a widget rebuild when changed.
+/// A hook that manages a mutable state value.
+///
+/// It returns a [ValueNotifier] that holds the current value. Any change to
+/// [ValueNotifier.value] will automatically trigger a rebuild of the
+/// [HookWidget] that uses this hook.
+///
+/// ```dart
+/// final counter = useState(0);
+/// return Text('${counter.value}');
+/// ```
 ValueNotifier<T> useState<T>(T initialData) {
   return use(_StateHook(initialData: initialData));
 }
@@ -42,13 +50,22 @@ class _StateHookState<T> extends HookState<ValueNotifier<T>, _StateHook<T>> {
   ValueNotifier<T> build(BuildContext context) => _notifier;
 }
 
-/// A side-effect hook.
-/// The [effect] runs on the first build and when [keys] change.
-/// It can return a cleanup function.
-void useEffect(
-  void Function()? Function() effect,
-  [List<Object?>? keys]
-) {
+/// A side-effect hook that runs code after layout.
+///
+/// The [effect] runs on the first build and whenever any value in [keys] changes.
+/// If [keys] is null, the effect runs on every build.
+/// If [keys] is empty `[]`, the effect runs only once (on mount).
+///
+/// [effect] can optionally return a cleanup function `void Function()` which
+/// will be called when the hook is disposed or before the effect runs again.
+///
+/// ```dart
+/// useEffect(() {
+///   print('Mounted');
+///   return () => print('Unmounted');
+/// }, []);
+/// ```
+void useEffect(void Function()? Function() effect, [List<Object?>? keys]) {
   use(_EffectHook(effect: effect, keys: keys));
 }
 
@@ -98,12 +115,15 @@ class _EffectHookState extends HookState<void, _EffectHook> {
   void build(BuildContext context) {}
 }
 
-/// Caches a complex computation.
-/// Recomputes only when [keys] change.
-T useMemoized<T>(
-  T Function() valueBuilder,
-  [List<Object?>? keys]
-) {
+/// Caches the result of a complex computation.
+///
+/// The [valueBuilder] is called on the first build and whenever any value in
+/// [keys] changes. Subsequent calls return the cached value.
+///
+/// ```dart
+/// final expensiveValue = useMemoized(() => computeSomething(), [deps]);
+/// ```
+T useMemoized<T>(T Function() valueBuilder, [List<Object?>? keys]) {
   return use(_MemoizedHook(valueBuilder: valueBuilder, keys: keys));
 }
 

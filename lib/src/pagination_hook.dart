@@ -3,6 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'framework.dart';
 
 /// The state returned by [usePagination].
+///
+/// It contains the current list of [items], status flags ([isLoading], [hasMore]),
+/// and methods to fetch more data or refresh the list.
 class PaginationState<T> {
   const PaginationState({
     required this.items,
@@ -20,8 +23,9 @@ class PaginationState<T> {
   /// Whether a fetch operation is currently in progress.
   final bool isLoading;
 
-  /// Whether more items might be available. 
-  /// Usually turns false when [fetcher] returns an empty list.
+  /// Whether more items might be available.
+  ///
+  /// Usually turns false when the [fetcher] returns an empty list.
   final bool hasMore;
 
   /// The current page number.
@@ -37,9 +41,14 @@ class PaginationState<T> {
   final Future<void> Function() refresh;
 }
 
-/// A hook that manages pagination state.
-/// It tracks a list of [items], [isLoading] state, and a [page] counter.
-/// It is rebuilt whenever new data is loaded.
+/// A hook that manages pagination state for infinite lists.
+///
+/// It tracks a list of [items], [isLoading] status, and a [page] counter.
+/// Use [PaginationState.fetchMore] to load the next page and
+/// [PaginationState.refresh] to reset and reload the list.
+///
+/// The [fetcher] is called with the current page number and should return
+/// a [Future] with a list of items.
 PaginationState<T> usePagination<T>({
   required Future<List<T>> Function(int page) fetcher,
   int initialPage = 1,

@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'framework.dart';
 import 'advanced_hooks.dart';
 
-/// The state of a [useQuery] request.
+/// The state of an asynchronous operation returned by [useQuery].
 class QueryState<T> {
   const QueryState({
     required this.data,
@@ -20,10 +20,10 @@ class QueryState<T> {
   /// The error thrown by the fetcher during the latest attempt.
   final Object? error;
 
-  /// True during the first-ever fetching cycle (when no data exists).
+  /// `true` during the first-ever fetching cycle (when no data exists).
   final bool isLoading;
 
-  /// True anytime the fetcher is yielding, including background refetches.
+  /// `true` anytime the fetcher is yielding, including background refetches.
   final bool isFetching;
 
   /// Explicitly trigger a refetch of the data. 
@@ -142,7 +142,7 @@ class _QueryHookState<T> extends HookState<QueryState<T>, _QueryHook<T>> {
   }
 }
 
-/// The state of a [useMutation] request.
+/// The state of a mutation returned by [useMutation].
 class MutationState<TData, TVariables> {
   const MutationState({
     this.data,
@@ -157,8 +157,10 @@ class MutationState<TData, TVariables> {
   final Future<TData?> Function(TVariables variables) mutate;
 }
 
-/// A hook tailored for executing operations that modify server-side data (like REST POST/PUT or GraphQL Mutations).
-/// Exposes [isMutating] alongside the generic [mutate] dispatcher.
+/// A hook for operations that modify server-side data (POST, PUT, DELETE).
+///
+/// It exposes [MutationState.isMutating] status and a [MutationState.mutate]
+/// function to trigger the operation.
 MutationState<TData, TVariables> useMutation<TData, TVariables>({
   required Future<TData> Function(TVariables variables) mutationFn,
   void Function(TData data, TVariables variables)? onSuccess,
@@ -246,7 +248,7 @@ class _MutationHookState<TData, TVariables>
   }
 }
 
-/// The state of a [useSubscription] request.
+/// The state of a subscription returned by [useSubscription].
 class SubscriptionState<T> {
   const SubscriptionState({
     required this.data,
@@ -254,10 +256,13 @@ class SubscriptionState<T> {
     required this.isConnected,
   });
 
+  /// The most recently emitted value from the stream.
   final T? data;
+
+  /// The last error emitted by the stream, if any.
   final Object? error;
-  
-  /// True if the stream is actively delivering events.
+
+  /// `true` if the stream is actively delivering events.
   final bool isConnected;
 }
 

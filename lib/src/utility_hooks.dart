@@ -4,9 +4,21 @@ import 'package:flutter/widgets.dart';
 
 import 'framework.dart';
 
-/// Returns a function that evaluates to true if the component is mounted.
-/// Useful for checking mount state after async operations to avoid calling
-/// [setState] or performing work on disposed components.
+/// Returns a function that evaluates to `true` if the component is mounted.
+///
+/// Useful for checking mount state after asynchronous operations to avoid
+/// performing work or calling `setState` on disposed components.
+///
+/// ```dart
+/// final isMounted = useIsMounted();
+/// useEffect(() {
+///   fetchData().then((data) {
+///     if (isMounted()) {
+///       setState(() => _data = data);
+///     }
+///   });
+/// }, []);
+/// ```
 bool Function() useIsMounted() {
   return use(const _IsMountedHook());
 }
@@ -37,7 +49,9 @@ class _IsMountedHookState extends HookState<bool Function(), _IsMountedHook> {
 }
 
 /// Subscribes to a [ValueListenable] and returns its current value.
-/// Automatically triggers a rebuild when the value changes.
+///
+/// This hook automatically triggers a rebuild of the [HookWidget] whenever
+/// the [ValueListenable] notifies its listeners.
 T useValueListenable<T>(ValueListenable<T> valueListenable) {
   return use(_ValueListenableHook<T>(valueListenable));
 }
@@ -81,6 +95,9 @@ class _ValueListenableHookState<T> extends HookState<T, _ValueListenableHook<T>>
 }
 
 /// Subscribes to a [Listenable] and triggers a rebuild when it notifies.
+///
+/// This is useful for [ChangeNotifier] or other [Listenable] objects
+/// that don't hold a single value.
 void useListenable(Listenable? listenable) {
   use(_ListenableHook(listenable));
 }
@@ -123,7 +140,10 @@ class _ListenableHookState extends HookState<void, _ListenableHook> {
   void build(BuildContext context) {}
 }
 
-/// Debounces a value, returning it only after [delay] has passed without updates.
+/// Debounces a value, returning the fresh value only after [delay] has passed
+/// without any new updates.
+///
+/// This is useful for search-as-you-type or other rate-limited interactions.
 T useDebounced<T>(T value, Duration delay) {
   return use(_DebouncedHook<T>(value, delay));
 }
