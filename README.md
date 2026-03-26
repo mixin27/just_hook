@@ -25,6 +25,10 @@ Provides building blocks to compose reusable behavior and state logic.
 - `useScrollController`: Creates an automatically disposable `ScrollController`.
 - `usePageController`: Creates an automatically disposable `PageController`.
 - `useFocusNode`: Creates an automatically disposable `FocusNode`.
+- `useIsMounted`: Returns a function evaluated to true if the widget is currently mounted.
+- `useValueListenable`: Subscribes to a `ValueListenable` automatically triggering rebuilds.
+- `useListenable`: Subscribes to a `Listenable` maintaining proper disposal/listener attachments.
+- `useDebounced`: Returns a debounced version of a value to avoid rapid continuous rebuilds or side-effects.
 
 ### Domain-Specific Hooks
 

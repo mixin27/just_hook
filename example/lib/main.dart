@@ -27,6 +27,7 @@ class MyHookPage extends HookWidget {
 
     // Advanced search hook automatically gives controller and string text
     final search = useSearch(initialText: 'Hooked Search');
+    final debouncedSearch = useDebounced(search.text, const Duration(milliseconds: 500));
 
     // Controller hooks
     final focusNode = useFocusNode();
@@ -77,6 +78,8 @@ class MyHookPage extends HookWidget {
               const SizedBox(height: 8),
               Text('You typed: ${search.text}',
                   style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text('Debounced: $debouncedSearch',
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
               const Divider(height: 48),
               Text('useStream Example:',
                   style: Theme.of(context).textTheme.titleLarge),
