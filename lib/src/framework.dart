@@ -145,6 +145,22 @@ R use<R>(Hook<R> hook) {
   return state.build(element);
 }
 
+/// A hook that returns the [BuildContext] of the [HookWidget].
+///
+/// This is useful for building other hooks that need access to the context.
+BuildContext useContext() => use(const _ContextHook());
+
+class _ContextHook extends Hook<BuildContext> {
+  const _ContextHook();
+  @override
+  _ContextHookState createState() => _ContextHookState();
+}
+
+class _ContextHookState extends HookState<BuildContext, _ContextHook> {
+  @override
+  BuildContext build(BuildContext context) => context;
+}
+
 /// Helper methods for comparing hook keys.
 class HookKeys {
   static bool didKeysChange(List<Object?>? oldKeys, List<Object?>? newKeys) {

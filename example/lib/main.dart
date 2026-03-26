@@ -101,7 +101,38 @@ class MyHookPage extends HookWidget {
                   style: Theme.of(context).textTheme.titleLarge),
               Text('Button taps: ${counter.value}',
                   style: const TextStyle(fontSize: 24)),
-              const SizedBox(height: 400),
+              const SizedBox(height: 32),
+              _ExampleButton(
+                title: 'Pagination Example',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PaginationExample()),
+                ),
+              ),
+              _ExampleButton(
+                title: 'Form Hooks Example',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FormExample()),
+                ),
+              ),
+              _ExampleButton(
+                title: 'Query & Animation Hooks',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const QueryAndAnimationExample()),
+                ),
+              ),
+              _ExampleButton(
+                title: 'Roadmap Hooks (Theme, Lifecycle, etc.)',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const RoadmapHooksExample()),
+                ),
+              ),
+              const SizedBox(height: 100),
               Text('Scroll to top...',
                   style: Theme.of(context).textTheme.titleLarge),
               ElevatedButton(
@@ -109,32 +140,6 @@ class MyHookPage extends HookWidget {
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOut),
                 child: const Text('Top'),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (c) => const PaginationExample()));
-                },
-                child: const Text('View Pagination Example'),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (c) => const FormExample()));
-                },
-                child: const Text('View Form Example'),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (c) => const QueryAndAnimationExample()));
-                },
-                child: const Text('View HTTP & Animation Example'),
               ),
             ],
           ),
@@ -148,34 +153,48 @@ class MyHookPage extends HookWidget {
   }
 }
 
+class _ExampleButton extends StatelessWidget {
+  const _ExampleButton({required this.title, required this.onTap});
+  final String title;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          minimumSize: const Size(double.infinity, 50),
+        ),
+        onPressed: onTap,
+        child: Text(title),
+      ),
+    );
+  }
+}
+
 class QueryAndAnimationExample extends HookWidget {
   const QueryAndAnimationExample({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // 1. Animation Controller Hook
     final animationController = useAnimationController(
-      // Animation completes in 2 seconds
       duration: const Duration(seconds: 2),
     );
 
-    // Memos animation to play whenever the widget is mounted or toggled
     useEffect(() {
       animationController.repeat(reverse: true);
       return null;
     }, const []);
     
-    // Animate the size according to the controller
     final animationValue = useValueListenable(animationController);
 
-    // 2. HTTP Query Hook Mock
     final fetcher = useMemoized(() => () async {
       await Future.delayed(const Duration(seconds: 1));
-      // Simple random behavior to simulate a REST API
       if (DateTime.now().second % 4 == 0) {
         throw Exception('Network error');
       }
-      return 'Server Data: \${DateTime.now().toIso8601String()}';
+      return 'Server Data: ${DateTime.now().toIso8601String()}';
     }, []);
 
     final httpQuery = useQuery<String>(
@@ -195,18 +214,15 @@ class QueryAndAnimationExample extends HookWidget {
               height: 100 * (1.0 + animationValue),
               color: Colors.blueAccent,
             ),
-            
             const Divider(height: 64),
-            
             const Text('HTTP useQuery Hook', style: TextStyle(fontSize: 20)),
             const SizedBox(height: 20),
-            
             if (httpQuery.isLoading)
               const CircularProgressIndicator()
             else if (httpQuery.error != null)
               Column(
                 children: [
-                   const Text('Error: \${httpQuery.error}', style: TextStyle(color: Colors.red)),
+                   Text('Error: ${httpQuery.error}', style: const TextStyle(color: Colors.red)),
                    const SizedBox(height: 8),
                    ElevatedButton(
                      onPressed: httpQuery.refetch,
@@ -255,9 +271,9 @@ class FormExample extends HookWidget {
               await Future.delayed(const Duration(seconds: 2));
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                     content: Text(
-                        'Submitted: \${data["name"]} / \${data["email"]}')),
+                        'Submitted: ${data["name"]} / ${data["email"]}')),
               );
             },
         []);
@@ -310,13 +326,12 @@ class PaginationExample extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Generate some fake data
     final fetchDummyData = useMemoized(
         () => (int page) async {
               await Future.delayed(const Duration(seconds: 1));
-              if (page >= 5) return <String>[]; // Stop after 5 pages
+              if (page >= 5) return <String>[];
               return List.generate(
-                  15, (i) => 'Item \${(page - 1) * 15 + i + 1}');
+                  15, (i) => 'Item ${(page - 1) * 15 + i + 1}');
             },
         []);
 
@@ -332,7 +347,6 @@ class PaginationExample extends HookWidget {
           itemCount: pagination.items.length + (pagination.hasMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == pagination.items.length) {
-              // Reached the end, load more
               if (!pagination.isLoading) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   pagination.fetchMore();
@@ -348,6 +362,76 @@ class PaginationExample extends HookWidget {
             return ListTile(title: Text(item));
           },
         ),
+      ),
+    );
+  }
+}
+
+class RoadmapHooksExample extends HookWidget {
+  const RoadmapHooksExample({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = useTheme();
+    final mediaQuery = useMediaQuery();
+    final lifecycle = useAppLifecycleState();
+
+    final controller = useStreamController<int>();
+    final count = useStream(controller.stream, initialData: 0);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Roadmap Hooks'),
+        backgroundColor: theme.colorScheme.inversePrimary,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(
+            child: ListTile(
+              title: const Text('useTheme'),
+              subtitle: Text('Primary Color: ${theme.primaryColor}'),
+              trailing: Icon(Icons.palette, color: theme.primaryColor),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: const Text('useMediaQuery'),
+              subtitle: Text(
+                  'Size: ${mediaQuery.size.width.toInt()} x ${mediaQuery.size.height.toInt()}'),
+              trailing: const Icon(Icons.aspect_ratio),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              title: const Text('useAppLifecycleState'),
+              subtitle: Text('Current State: ${lifecycle.name}'),
+              trailing: Icon(
+                lifecycle == AppLifecycleState.resumed
+                    ? Icons.visibility
+                    : Icons.visibility_off,
+              ),
+            ),
+          ),
+          Card(
+            child: Column(
+              children: [
+                ListTile(
+                  title: const Text('useStreamController'),
+                  subtitle: Text('Stream Value: ${count.data}'),
+                  trailing: const Icon(Icons.reorder),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    onPressed: () => controller.add((count.data ?? 0) + 1),
+                    child: const Text('Add to Stream'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -6,3 +6,5 @@ export 'src/utility_hooks.dart';
 export 'src/form_hook.dart';
 export 'src/animation_hook.dart';
 export 'src/query_hook.dart';
+export 'src/context_hooks.dart';
+export 'src/lifecycle_hooks.dart';

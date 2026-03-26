@@ -189,3 +189,75 @@ class _DebouncedHookState<T> extends HookState<T, _DebouncedHook<T>> {
   @override
   T build(BuildContext context) => _debouncedValue;
 }
+
+/// Creates a [StreamController] that will be disposed automatically.
+///
+/// If [keys] are provided, the [StreamController] is recreated whenever [keys] change.
+///
+/// ```dart
+/// final controller = useStreamController<int>();
+/// controller.add(10);
+/// ```
+StreamController<T> useStreamController<T>({
+  bool sync = false,
+  VoidCallback? onListen,
+  VoidCallback? onPause,
+  VoidCallback? onResume,
+  FutureOr<void> Function()? onCancel,
+  List<Object?>? keys,
+}) {
+  return use(_StreamControllerHook<T>(
+    sync: sync,
+    onListen: onListen,
+    onPause: onPause,
+    onResume: onResume,
+    onCancel: onCancel,
+    keys: keys,
+  ));
+}
+
+class _StreamControllerHook<T> extends Hook<StreamController<T>> {
+  const _StreamControllerHook({
+    required this.sync,
+    this.onListen,
+    this.onPause,
+    this.onResume,
+    this.onCancel,
+    super.keys,
+  });
+
+  final bool sync;
+  final VoidCallback? onListen;
+  final VoidCallback? onPause;
+  final VoidCallback? onResume;
+  final FutureOr<void> Function()? onCancel;
+
+  @override
+  _StreamControllerHookState<T> createState() => _StreamControllerHookState<T>();
+}
+
+class _StreamControllerHookState<T> 
+    extends HookState<StreamController<T>, _StreamControllerHook<T>> {
+  late StreamController<T> _controller;
+
+  @override
+  void initHook() {
+    super.initHook();
+    _controller = StreamController<T>(
+      sync: hook.sync,
+      onListen: hook.onListen,
+      onPause: hook.onPause,
+      onResume: hook.onResume,
+      onCancel: hook.onCancel,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.close();
+    super.dispose();
+  }
+
+  @override
+  StreamController<T> build(BuildContext context) => _controller;
+}
