@@ -147,7 +147,7 @@ class _MemoizedHookState<T> extends HookState<T, _MemoizedHook<T>> {
   @override
   void didUpdateHook(_MemoizedHook<T> oldHook) {
     super.didUpdateHook(oldHook);
-    if (HookKeys.didKeysChange(oldHook.keys, hook.keys)) {
+    if (hook.keys != null && HookKeys.didKeysChange(oldHook.keys, hook.keys)) {
       _value = hook.valueBuilder();
     }
   }

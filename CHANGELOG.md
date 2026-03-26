@@ -1,3 +1,11 @@
+## 0.0.2
+
+- **Testing**: Added a comprehensive unit test suite (18 tests) covering the core framework and all provided hooks.
+- **Framework Fix**: Fixed `HookKeys.didKeysChange` to correctly handle `null` keys, ensuring hooks like `usePrevious` work accurately across rebuilds.
+- **Performance Optimization**: Optimized `useMemoized`, `usePagination`, and controller hooks (`useTextEditingController`, `useScrollController`, etc.) to prevent accidental disposals and re-creations when no keys are provided.
+- **Stability**: Fixed a race condition in `usePagination` initialization and improved async test reliability.
+- **CI/CD**: Enhanced the GitHub Actions workflow with strict analysis (`--fatal-infos`) and consistent Flutter commands.
+
 ## 0.0.1
 
 - **Initial Release:** A lightweight, highly scalable, and structurally complete Flutter Hooks framework alternatively styled around React-Hooks.

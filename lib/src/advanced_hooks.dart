@@ -42,7 +42,7 @@ class _TextEditingControllerHookState
   @override
   void didUpdateHook(_TextEditingControllerHook oldHook) {
     super.didUpdateHook(oldHook);
-    if (HookKeys.didKeysChange(oldHook.keys, hook.keys)) {
+    if (hook.keys != null && HookKeys.didKeysChange(oldHook.keys, hook.keys)) {
       _controller.dispose();
       _controller = TextEditingController(text: hook.text);
     }
@@ -385,7 +385,7 @@ class _ScrollControllerHookState
   @override
   void didUpdateHook(_ScrollControllerHook oldHook) {
     super.didUpdateHook(oldHook);
-    if (HookKeys.didKeysChange(oldHook.keys, hook.keys)) {
+    if (hook.keys != null && HookKeys.didKeysChange(oldHook.keys, hook.keys)) {
       _controller.dispose();
       _controller = ScrollController(
         initialScrollOffset: hook.initialScrollOffset,
@@ -457,7 +457,7 @@ class _PageControllerHookState
   @override
   void didUpdateHook(_PageControllerHook oldHook) {
     super.didUpdateHook(oldHook);
-    if (HookKeys.didKeysChange(oldHook.keys, hook.keys)) {
+    if (hook.keys != null && HookKeys.didKeysChange(oldHook.keys, hook.keys)) {
       _controller.dispose();
       _controller = PageController(
         initialPage: hook.initialPage,
@@ -538,7 +538,7 @@ class _FocusNodeHookState extends HookState<FocusNode, _FocusNodeHook> {
   @override
   void didUpdateHook(_FocusNodeHook oldHook) {
     super.didUpdateHook(oldHook);
-    if (HookKeys.didKeysChange(oldHook.keys, hook.keys)) {
+    if (hook.keys != null && HookKeys.didKeysChange(oldHook.keys, hook.keys)) {
       _focusNode.dispose();
       _focusNode = FocusNode(
         debugLabel: hook.debugLabel,

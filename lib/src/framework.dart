@@ -217,8 +217,8 @@ class _ContextHookState extends HookState<BuildContext, _ContextHook> {
 /// Helper methods for comparing hook keys.
 class HookKeys {
   static bool didKeysChange(List<Object?>? oldKeys, List<Object?>? newKeys) {
-    if (identical(oldKeys, newKeys)) return false;
     if (oldKeys == null || newKeys == null) return true;
+    if (identical(oldKeys, newKeys)) return false;
     if (oldKeys.length != newKeys.length) return true;
     for (int i = 0; i < oldKeys.length; i++) {
       if (oldKeys[i] != newKeys[i]) return true;
