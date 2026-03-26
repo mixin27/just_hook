@@ -2,6 +2,9 @@
 
 A lightweight and simple open-source Flutter hooks framework inspired by `flutter_hooks` and `React Hooks`.
 
+[![CI](https://github.com/mixin27/just_hook/actions/workflows/ci.yaml/badge.svg)](https://github.com/mixin27/just_hook/actions/workflows/ci.yaml)
+![GitHub License](https://img.shields.io/github/license/mixin27/just_hook)
+
 ### HookBuilder
 
 Need hooks in a regular `StatelessWidget` or `StatefulWidget`? Use `HookBuilder`:
@@ -20,6 +23,7 @@ Widget build(BuildContext context) {
 ```
 
 ## Features Deep Dive
+
 Provides building blocks to compose reusable behavior and state logic.
 
 ### Standard Hooks
