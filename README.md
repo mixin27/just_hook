@@ -26,6 +26,10 @@ Provides building blocks to compose reusable behavior and state logic.
 - `usePageController`: Creates an automatically disposable `PageController`.
 - `useFocusNode`: Creates an automatically disposable `FocusNode`.
 
+### Domain-Specific Hooks
+
+- `usePagination`: Easily handle typical infinite-scrolling scenarios. Manages data fetching, appending, refresh, and loading states automatically.
+
 ## Getting started
 
 Add `just_hook` to your `pubspec.yaml`:

@@ -105,6 +105,13 @@ class MyHookPage extends HookWidget {
                     curve: Curves.easeOut),
                 child: const Text('Top'),
               ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (c) => const PaginationExample()));
+                },
+                child: const Text('View Pagination Example'),
+              ),
             ],
           ),
         ),
@@ -112,6 +119,51 @@ class MyHookPage extends HookWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => counter.value++,
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class PaginationExample extends HookWidget {
+  const PaginationExample({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Generate some fake data
+    final fetchDummyData = useMemoized(() => (int page) async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (page >= 5) return <String>[]; // Stop after 5 pages
+      return List.generate(15, (i) => 'Item \${(page - 1) * 15 + i + 1}');
+    }, []);
+
+    final pagination = usePagination<String>(
+      fetcher: fetchDummyData,
+    );
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Pagination Hook')),
+      body: RefreshIndicator(
+        onRefresh: pagination.refresh,
+        child: ListView.builder(
+          itemCount: pagination.items.length + (pagination.hasMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == pagination.items.length) {
+              // Reached the end, load more
+              if (!pagination.isLoading) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  pagination.fetchMore();
+                });
+              }
+              return const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            final item = pagination.items[index];
+            return ListTile(title: Text(item));
+          },
+        ),
       ),
     );
   }
