@@ -14,7 +14,7 @@ class FormController {
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, List<HookValidator>> _validators = {};
   final Map<String, String?> _errors = {};
-  
+
   bool _isSubmitting = false;
 
   /// Returns the current validation errors across all fields.
@@ -36,7 +36,8 @@ class FormController {
 
   /// Registers a text field by [name] and creates a [TextEditingController] for it.
   /// You can provide [validators] to automatically track error states.
-  TextEditingController register(String name, {
+  TextEditingController register(
+    String name, {
     List<HookValidator> validators = const [],
     String? initialValue,
   }) {
@@ -92,10 +93,12 @@ class FormController {
     return valid;
   }
 
-  /// Submits the form if it is valid. 
+  /// Submits the form if it is valid.
   /// The [onSubmit] callback is invoked with the current form values.
   /// Automatically manages [isSubmitting] states during the asynchronous gap.
-  Future<void> submit(FutureOr<void> Function(Map<String, String> data) onSubmit) async {
+  Future<void> submit(
+    FutureOr<void> Function(Map<String, String> data) onSubmit,
+  ) async {
     if (!validate()) return;
 
     _isSubmitting = true;

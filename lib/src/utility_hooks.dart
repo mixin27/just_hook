@@ -45,7 +45,8 @@ class _IsMountedHookState extends HookState<bool Function(), _IsMountedHook> {
   }
 
   @override
-  bool Function() build(BuildContext context) => () => _isMounted;
+  bool Function() build(BuildContext context) =>
+      () => _isMounted;
 }
 
 /// Subscribes to a [ValueListenable] and returns its current value.
@@ -64,7 +65,8 @@ class _ValueListenableHook<T> extends Hook<T> {
   _ValueListenableHookState<T> createState() => _ValueListenableHookState<T>();
 }
 
-class _ValueListenableHookState<T> extends HookState<T, _ValueListenableHook<T>> {
+class _ValueListenableHookState<T>
+    extends HookState<T, _ValueListenableHook<T>> {
   @override
   void initHook() {
     super.initHook();
@@ -206,14 +208,16 @@ StreamController<T> useStreamController<T>({
   FutureOr<void> Function()? onCancel,
   List<Object?>? keys,
 }) {
-  return use(_StreamControllerHook<T>(
-    sync: sync,
-    onListen: onListen,
-    onPause: onPause,
-    onResume: onResume,
-    onCancel: onCancel,
-    keys: keys,
-  ));
+  return use(
+    _StreamControllerHook<T>(
+      sync: sync,
+      onListen: onListen,
+      onPause: onPause,
+      onResume: onResume,
+      onCancel: onCancel,
+      keys: keys,
+    ),
+  );
 }
 
 class _StreamControllerHook<T> extends Hook<StreamController<T>> {
@@ -233,10 +237,11 @@ class _StreamControllerHook<T> extends Hook<StreamController<T>> {
   final FutureOr<void> Function()? onCancel;
 
   @override
-  _StreamControllerHookState<T> createState() => _StreamControllerHookState<T>();
+  _StreamControllerHookState<T> createState() =>
+      _StreamControllerHookState<T>();
 }
 
-class _StreamControllerHookState<T> 
+class _StreamControllerHookState<T>
     extends HookState<StreamController<T>, _StreamControllerHook<T>> {
   late StreamController<T> _controller;
 

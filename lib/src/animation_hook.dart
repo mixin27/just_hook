@@ -19,16 +19,18 @@ AnimationController useAnimationController({
   AnimationBehavior animationBehavior = AnimationBehavior.normal,
   List<Object?>? keys,
 }) {
-  return use(_AnimationControllerHook(
-    duration: duration,
-    reverseDuration: reverseDuration,
-    debugLabel: debugLabel,
-    initialValue: initialValue,
-    lowerBound: lowerBound,
-    upperBound: upperBound,
-    animationBehavior: animationBehavior,
-    keys: keys,
-  ));
+  return use(
+    _AnimationControllerHook(
+      duration: duration,
+      reverseDuration: reverseDuration,
+      debugLabel: debugLabel,
+      initialValue: initialValue,
+      lowerBound: lowerBound,
+      upperBound: upperBound,
+      animationBehavior: animationBehavior,
+      keys: keys,
+    ),
+  );
 }
 
 class _AnimationControllerHook extends Hook<AnimationController> {
@@ -52,11 +54,12 @@ class _AnimationControllerHook extends Hook<AnimationController> {
   final AnimationBehavior animationBehavior;
 
   @override
-  _AnimationControllerHookState createState() => _AnimationControllerHookState();
+  _AnimationControllerHookState createState() =>
+      _AnimationControllerHookState();
 }
 
-class _AnimationControllerHookState 
-    extends HookState<AnimationController, _AnimationControllerHook> 
+class _AnimationControllerHookState
+    extends HookState<AnimationController, _AnimationControllerHook>
     implements TickerProvider {
   late AnimationController _controller;
   Set<Ticker>? _tickers;

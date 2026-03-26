@@ -26,14 +26,14 @@ class QueryState<T> {
   /// `true` anytime the fetcher is yielding, including background refetches.
   final bool isFetching;
 
-  /// Explicitly trigger a refetch of the data. 
+  /// Explicitly trigger a refetch of the data.
   /// The [isFetching] state will turn true whilst waiting.
   final Future<void> Function() refetch;
 }
 
 /// A hook tailored for fetching, caching, and serving asynchronous requests,
 /// especially identical to fetching HTTP REST APIs.
-/// 
+///
 /// It mimics `useQuery` from popular fetching libraries by providing
 /// discrete [QueryState.isLoading], [QueryState.isFetching], and [QueryState.refetch] flags.
 QueryState<T> useQuery<T>({
@@ -42,12 +42,14 @@ QueryState<T> useQuery<T>({
   T? initialData,
   bool enabled = true,
 }) {
-  return use(_QueryHook<T>(
-    fetcher: fetcher,
-    keys: keys,
-    initialData: initialData,
-    enabled: enabled,
-  ));
+  return use(
+    _QueryHook<T>(
+      fetcher: fetcher,
+      keys: keys,
+      initialData: initialData,
+      enabled: enabled,
+    ),
+  );
 }
 
 class _QueryHook<T> extends Hook<QueryState<T>> {
@@ -88,7 +90,8 @@ class _QueryHookState<T> extends HookState<QueryState<T>, _QueryHook<T>> {
     super.didUpdateHook(oldHook);
     if (!oldHook.enabled && hook.enabled) {
       _fetchData(isInitial: _data == null);
-    } else if (hook.enabled && HookKeys.didKeysChange(oldHook.keys, hook.keys)) {
+    } else if (hook.enabled &&
+        HookKeys.didKeysChange(oldHook.keys, hook.keys)) {
       _fetchData(isInitial: _data == null);
     }
   }
@@ -167,15 +170,18 @@ MutationState<TData, TVariables> useMutation<TData, TVariables>({
   void Function(Object error, TVariables variables)? onError,
   void Function(TVariables variables)? onMutate,
 }) {
-  return use(_MutationHook<TData, TVariables>(
-    mutationFn: mutationFn,
-    onSuccess: onSuccess,
-    onError: onError,
-    onMutate: onMutate,
-  ));
+  return use(
+    _MutationHook<TData, TVariables>(
+      mutationFn: mutationFn,
+      onSuccess: onSuccess,
+      onError: onError,
+      onMutate: onMutate,
+    ),
+  );
 }
 
-class _MutationHook<TData, TVariables> extends Hook<MutationState<TData, TVariables>> {
+class _MutationHook<TData, TVariables>
+    extends Hook<MutationState<TData, TVariables>> {
   const _MutationHook({
     required this.mutationFn,
     this.onSuccess,
@@ -189,11 +195,16 @@ class _MutationHook<TData, TVariables> extends Hook<MutationState<TData, TVariab
   final void Function(TVariables variables)? onMutate;
 
   @override
-  _MutationHookState<TData, TVariables> createState() => _MutationHookState<TData, TVariables>();
+  _MutationHookState<TData, TVariables> createState() =>
+      _MutationHookState<TData, TVariables>();
 }
 
-class _MutationHookState<TData, TVariables> 
-    extends HookState<MutationState<TData, TVariables>, _MutationHook<TData, TVariables>> {
+class _MutationHookState<TData, TVariables>
+    extends
+        HookState<
+          MutationState<TData, TVariables>,
+          _MutationHook<TData, TVariables>
+        > {
   TData? _data;
   Object? _error;
   bool _isMutating = false;

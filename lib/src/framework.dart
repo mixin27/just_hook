@@ -53,47 +53,61 @@ abstract class HookState<R, T extends Hook<R>> {
   }
 }
 
-/// An element that builds a [HookWidget] and manages [HookState] instances.
-///
-/// This is the internal engine that tracks hook registration order and lifecycles.
-class HookElement extends StatelessElement {
-  HookElement(HookWidget super.widget);
-
+/// A mixin that provides hook functionality to an [Element].
+mixin HookElementMixin on Element {
   List<HookState<dynamic, Hook<dynamic>>>? _hooks;
   int _hookIndex = 0;
   bool _isFirstBuild = true;
 
-  @override
-  HookWidget get widget => super.widget as HookWidget;
-
-  @override
-  Widget build() {
+  /// The internal engine that tracks hook registration order and lifecycles.
+  Widget useHookElement(Widget Function(BuildContext context) build) {
     _hookIndex = 0;
-    HookElement._currentHookElement = this;
-    final result = super.build();
-    HookElement._currentHookElement = null;
-    _isFirstBuild = false;
+    final oldElement = _currentHookElement;
+    _currentHookElement = this;
+    try {
+      final result = build(this);
+      _isFirstBuild = false;
 
-    if (_hooks != null && _hookIndex != _hooks!.length) {
-      throw StateError(
-        'Hooks were added or removed during build. '
-        'Hooks must be called in the exact same order on every build.',
-      );
+      if (_hooks != null && _hookIndex != _hooks!.length) {
+        throw StateError(
+          'Hooks were added or removed during build. '
+          'Hooks must be called in the exact same order on every build.',
+        );
+      }
+      return result;
+    } finally {
+      _currentHookElement = oldElement;
     }
-    return result;
   }
 
-  @override
-  void unmount() {
+  /// Disposes all hooks associated with this element.
+  void unmountHooks() {
     if (_hooks != null) {
       for (final hookState in _hooks!) {
         hookState.dispose();
       }
     }
-    super.unmount();
   }
 
-  static HookElement? _currentHookElement;
+  static Element? _currentHookElement;
+}
+
+/// An element that builds a [HookWidget] and manages [HookState] instances.
+class HookElement extends StatelessElement with HookElementMixin {
+  HookElement(HookWidget super.widget);
+
+  @override
+  HookWidget get widget => super.widget as HookWidget;
+
+  @override
+  // ignore: invalid_use_of_protected_member
+  Widget build() => useHookElement((context) => widget.build(context));
+
+  @override
+  void unmount() {
+    unmountHooks();
+    super.unmount();
+  }
 }
 
 /// A widget that uses Hooks.
@@ -104,33 +118,71 @@ abstract class HookWidget extends StatelessWidget {
   StatelessElement createElement() => HookElement(this);
 }
 
+/// A widget that builds a [HookWidget] from a builder function.
+class HookBuilder extends HookWidget {
+  const HookBuilder({super.key, required this.builder});
+
+  /// The builder function that uses hooks.
+  final Widget Function(BuildContext context) builder;
+
+  @override
+  Widget build(BuildContext context) => builder(context);
+}
+
+/// A [StatefulWidget] that supports hooks in its build method.
+abstract class StatefulHookWidget extends StatefulWidget {
+  const StatefulHookWidget({super.key});
+
+  @override
+  StatefulHookElement createElement() => StatefulHookElement(this);
+}
+
+/// An element for [StatefulHookWidget].
+class StatefulHookElement extends StatefulElement with HookElementMixin {
+  StatefulHookElement(StatefulHookWidget super.widget);
+
+  @override
+  // ignore: invalid_use_of_protected_member
+  Widget build() => useHookElement((context) => super.build());
+
+  @override
+  void unmount() {
+    unmountHooks();
+    super.unmount();
+  }
+}
+
 /// Registers a [Hook] and returns its produced value.
 ///
 /// This function must be called only within the `build` method of a [HookWidget].
 /// It handles hook creation, lifecycle management, and state persistence across builds.
 R use<R>(Hook<R> hook) {
-  final element = HookElement._currentHookElement;
+  final element = HookElementMixin._currentHookElement;
   if (element == null) {
     throw StateError(
-        'Hooks can only be called inside the build method of a HookWidget.');
+      'Hooks can only be called inside the build method of a HookWidget, '
+      'HookBuilder, or StatefulHookWidget.',
+    );
   }
 
-  element._hooks ??= [];
+  final hooksElement = element as HookElementMixin;
+  hooksElement._hooks ??= [];
 
-  if (element._isFirstBuild || element._hookIndex >= element._hooks!.length) {
+  if (hooksElement._isFirstBuild ||
+      hooksElement._hookIndex >= hooksElement._hooks!.length) {
     final hookState = hook.createState();
     hookState._hook = hook;
     hookState._context = element;
     hookState.initHook();
 
-    if (element._hookIndex >= element._hooks!.length) {
-      element._hooks!.add(hookState);
+    if (hooksElement._hookIndex >= hooksElement._hooks!.length) {
+      hooksElement._hooks!.add(hookState);
     } else {
-      element._hooks![element._hookIndex] = hookState;
+      hooksElement._hooks![hooksElement._hookIndex] = hookState;
     }
   } else {
     final hookState =
-        element._hooks![element._hookIndex] as HookState<R, Hook<R>>;
+        hooksElement._hooks![hooksElement._hookIndex] as HookState<R, Hook<R>>;
     final oldHook = hookState.hook;
     hookState._hook = hook;
 
@@ -140,8 +192,9 @@ R use<R>(Hook<R> hook) {
     }
   }
 
-  final state = element._hooks![element._hookIndex] as HookState<R, Hook<R>>;
-  element._hookIndex++;
+  final state =
+      hooksElement._hooks![hooksElement._hookIndex] as HookState<R, Hook<R>>;
+  hooksElement._hookIndex++;
   return state.build(element);
 }
 

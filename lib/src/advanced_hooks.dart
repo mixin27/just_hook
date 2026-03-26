@@ -64,10 +64,7 @@ class _TextEditingControllerHookState
 /// and subscribe to the new one.
 ///
 /// The [initialData] is used as the default value while the future is loading.
-AsyncSnapshot<T> useFuture<T>(
-  Future<T>? future, {
-  T? initialData,
-}) {
+AsyncSnapshot<T> useFuture<T>(Future<T>? future, {T? initialData}) {
   return use(_FutureHook<T>(future: future, initialData: initialData));
 }
 
@@ -90,7 +87,10 @@ class _FutureHookState<T> extends HookState<AsyncSnapshot<T>, _FutureHook<T>> {
     super.initHook();
     _snapshot = hook.initialData == null
         ? AsyncSnapshot<T>.nothing()
-        : AsyncSnapshot<T>.withData(ConnectionState.none, hook.initialData as T);
+        : AsyncSnapshot<T>.withData(
+            ConnectionState.none,
+            hook.initialData as T,
+          );
     _subscribe();
   }
 
@@ -108,7 +108,9 @@ class _FutureHookState<T> extends HookState<AsyncSnapshot<T>, _FutureHook<T>> {
   void _subscribe() {
     if (hook.future == null) {
       _snapshot = AsyncSnapshot<T>.withData(
-          ConnectionState.none, hook.initialData as T);
+        ConnectionState.none,
+        hook.initialData as T,
+      );
       return;
     }
 
@@ -117,22 +119,31 @@ class _FutureHookState<T> extends HookState<AsyncSnapshot<T>, _FutureHook<T>> {
 
     _snapshot = hook.initialData == null
         ? AsyncSnapshot<T>.waiting()
-        : AsyncSnapshot<T>.withData(ConnectionState.waiting, hook.initialData as T);
+        : AsyncSnapshot<T>.withData(
+            ConnectionState.waiting,
+            hook.initialData as T,
+          );
 
-    hook.future!.then<void>((T data) {
-      if (_activeCallbackIdentity == callbackIdentity) {
-        setState(() {
-          _snapshot = AsyncSnapshot<T>.withData(ConnectionState.done, data);
-        });
-      }
-    }, onError: (Object error, StackTrace stackTrace) {
-      if (_activeCallbackIdentity == callbackIdentity) {
-        setState(() {
-          _snapshot = AsyncSnapshot<T>.withError(
-              ConnectionState.done, error, stackTrace);
-        });
-      }
-    });
+    hook.future!.then<void>(
+      (T data) {
+        if (_activeCallbackIdentity == callbackIdentity) {
+          setState(() {
+            _snapshot = AsyncSnapshot<T>.withData(ConnectionState.done, data);
+          });
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        if (_activeCallbackIdentity == callbackIdentity) {
+          setState(() {
+            _snapshot = AsyncSnapshot<T>.withError(
+              ConnectionState.done,
+              error,
+              stackTrace,
+            );
+          });
+        }
+      },
+    );
   }
 
   void _unsubscribe() {
@@ -155,10 +166,7 @@ class _FutureHookState<T> extends HookState<AsyncSnapshot<T>, _FutureHook<T>> {
 /// and subscribe to the new one.
 ///
 /// The [initialData] is used as the default data before the stream emits anything.
-AsyncSnapshot<T> useStream<T>(
-  Stream<T>? stream, {
-  T? initialData,
-}) {
+AsyncSnapshot<T> useStream<T>(Stream<T>? stream, {T? initialData}) {
   return use(_StreamHook<T>(stream: stream, initialData: initialData));
 }
 
@@ -181,7 +189,10 @@ class _StreamHookState<T> extends HookState<AsyncSnapshot<T>, _StreamHook<T>> {
     super.initHook();
     _snapshot = hook.initialData == null
         ? AsyncSnapshot<T>.nothing()
-        : AsyncSnapshot<T>.withData(ConnectionState.none, hook.initialData as T);
+        : AsyncSnapshot<T>.withData(
+            ConnectionState.none,
+            hook.initialData as T,
+          );
     _subscribe();
   }
 
@@ -199,13 +210,18 @@ class _StreamHookState<T> extends HookState<AsyncSnapshot<T>, _StreamHook<T>> {
   void _subscribe() {
     if (hook.stream == null) {
       _snapshot = AsyncSnapshot<T>.withData(
-          ConnectionState.none, hook.initialData as T);
+        ConnectionState.none,
+        hook.initialData as T,
+      );
       return;
     }
 
     _snapshot = hook.initialData == null
         ? AsyncSnapshot<T>.waiting()
-        : AsyncSnapshot<T>.withData(ConnectionState.waiting, hook.initialData as T);
+        : AsyncSnapshot<T>.withData(
+            ConnectionState.waiting,
+            hook.initialData as T,
+          );
 
     _subscription = hook.stream!.listen(
       (T data) {
@@ -216,7 +232,10 @@ class _StreamHookState<T> extends HookState<AsyncSnapshot<T>, _StreamHook<T>> {
       onError: (Object error, StackTrace stackTrace) {
         setState(() {
           _snapshot = AsyncSnapshot<T>.withError(
-              ConnectionState.active, error, stackTrace);
+            ConnectionState.active,
+            error,
+            stackTrace,
+          );
         });
       },
       onDone: () {
@@ -242,8 +261,8 @@ class _StreamHookState<T> extends HookState<AsyncSnapshot<T>, _StreamHook<T>> {
   AsyncSnapshot<T> build(BuildContext context) => _snapshot;
 }
 
-/// A convenience hook for search state. 
-/// It creates a [TextEditingController], attaches a listener, 
+/// A convenience hook for search state.
+/// It creates a [TextEditingController], attaches a listener,
 /// and returns the current text.
 /// It rebuilds the widget whenever the text changes.
 /// The state returned by [useSearch].
@@ -260,13 +279,14 @@ class SearchState {
 SearchState useSearch({String? initialText}) {
   final controller = useTextEditingController(text: initialText);
   // Rebuild whenever the text changes using `useState` and `useEffect`.
-  // Wait, `useTextEditingController` doesn't rebuild. 
+  // Wait, `useTextEditingController` doesn't rebuild.
   final text = useState(controller.text);
 
   useEffect(() {
     void listener() {
       text.value = controller.text;
     }
+
     controller.addListener(listener);
     return () => controller.removeListener(listener);
   }, [controller]);
@@ -322,12 +342,14 @@ ScrollController useScrollController({
   String? debugLabel,
   List<Object?>? keys,
 }) {
-  return use(_ScrollControllerHook(
-    initialScrollOffset: initialScrollOffset,
-    keepScrollOffset: keepScrollOffset,
-    debugLabel: debugLabel,
-    keys: keys,
-  ));
+  return use(
+    _ScrollControllerHook(
+      initialScrollOffset: initialScrollOffset,
+      keepScrollOffset: keepScrollOffset,
+      debugLabel: debugLabel,
+      keys: keys,
+    ),
+  );
 }
 
 class _ScrollControllerHook extends Hook<ScrollController> {
@@ -346,7 +368,8 @@ class _ScrollControllerHook extends Hook<ScrollController> {
   _ScrollControllerHookState createState() => _ScrollControllerHookState();
 }
 
-class _ScrollControllerHookState extends HookState<ScrollController, _ScrollControllerHook> {
+class _ScrollControllerHookState
+    extends HookState<ScrollController, _ScrollControllerHook> {
   late ScrollController _controller;
 
   @override
@@ -391,12 +414,14 @@ PageController usePageController({
   double viewportFraction = 1.0,
   List<Object?>? keys,
 }) {
-  return use(_PageControllerHook(
-    initialPage: initialPage,
-    keepPage: keepPage,
-    viewportFraction: viewportFraction,
-    keys: keys,
-  ));
+  return use(
+    _PageControllerHook(
+      initialPage: initialPage,
+      keepPage: keepPage,
+      viewportFraction: viewportFraction,
+      keys: keys,
+    ),
+  );
 }
 
 class _PageControllerHook extends Hook<PageController> {
@@ -415,7 +440,8 @@ class _PageControllerHook extends Hook<PageController> {
   _PageControllerHookState createState() => _PageControllerHookState();
 }
 
-class _PageControllerHookState extends HookState<PageController, _PageControllerHook> {
+class _PageControllerHookState
+    extends HookState<PageController, _PageControllerHook> {
   late PageController _controller;
 
   @override
@@ -462,14 +488,16 @@ FocusNode useFocusNode({
   bool descendantsAreTraversable = true,
   List<Object?>? keys,
 }) {
-  return use(_FocusNodeHook(
-    debugLabel: debugLabel,
-    canRequestFocus: canRequestFocus,
-    skipTraversal: skipTraversal,
-    descendantsAreFocusable: descendantsAreFocusable,
-    descendantsAreTraversable: descendantsAreTraversable,
-    keys: keys,
-  ));
+  return use(
+    _FocusNodeHook(
+      debugLabel: debugLabel,
+      canRequestFocus: canRequestFocus,
+      skipTraversal: skipTraversal,
+      descendantsAreFocusable: descendantsAreFocusable,
+      descendantsAreTraversable: descendantsAreTraversable,
+      keys: keys,
+    ),
+  );
 }
 
 class _FocusNodeHook extends Hook<FocusNode> {

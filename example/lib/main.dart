@@ -132,6 +132,14 @@ class MyHookPage extends HookWidget {
                       builder: (_) => const RoadmapHooksExample()),
                 ),
               ),
+              _ExampleButton(
+                title: 'HookBuilder & StatefulHookWidget',
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const StatefulAndBuilderExample()),
+                ),
+              ),
               const SizedBox(height: 100),
               Text('Scroll to top...',
                   style: Theme.of(context).textTheme.titleLarge),
@@ -186,16 +194,18 @@ class QueryAndAnimationExample extends HookWidget {
       animationController.repeat(reverse: true);
       return null;
     }, const []);
-    
+
     final animationValue = useValueListenable(animationController);
 
-    final fetcher = useMemoized(() => () async {
-      await Future.delayed(const Duration(seconds: 1));
-      if (DateTime.now().second % 4 == 0) {
-        throw Exception('Network error');
-      }
-      return 'Server Data: ${DateTime.now().toIso8601String()}';
-    }, []);
+    final fetcher = useMemoized(
+        () => () async {
+              await Future.delayed(const Duration(seconds: 1));
+              if (DateTime.now().second % 4 == 0) {
+                throw Exception('Network error');
+              }
+              return 'Server Data: ${DateTime.now().toIso8601String()}';
+            },
+        []);
 
     final httpQuery = useQuery<String>(
       fetcher: fetcher,
@@ -207,7 +217,8 @@ class QueryAndAnimationExample extends HookWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Animation Controller Hook', style: TextStyle(fontSize: 20)),
+            const Text('Animation Controller Hook',
+                style: TextStyle(fontSize: 20)),
             const SizedBox(height: 20),
             Container(
               width: 100 * (1.0 + animationValue),
@@ -220,29 +231,29 @@ class QueryAndAnimationExample extends HookWidget {
             if (httpQuery.isLoading)
               const CircularProgressIndicator()
             else if (httpQuery.error != null)
-              Column(
-                children: [
-                   Text('Error: ${httpQuery.error}', style: const TextStyle(color: Colors.red)),
-                   const SizedBox(height: 8),
-                   ElevatedButton(
-                     onPressed: httpQuery.refetch,
-                     child: const Text('Retry'),
-                   ),
-                ]
-              )
+              Column(children: [
+                Text('Error: ${httpQuery.error}',
+                    style: const TextStyle(color: Colors.red)),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: httpQuery.refetch,
+                  child: const Text('Retry'),
+                ),
+              ])
             else
-              Column(
-                children: [
-                   Text(httpQuery.data ?? 'No Data'),
-                   const SizedBox(height: 16),
-                   ElevatedButton(
-                     onPressed: httpQuery.isFetching ? null : httpQuery.refetch,
-                     child: httpQuery.isFetching
-                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Text('Refetch'),
-                   ),
-                ]
-              )
+              Column(children: [
+                Text(httpQuery.data ?? 'No Data'),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: httpQuery.isFetching ? null : httpQuery.refetch,
+                  child: httpQuery.isFetching
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text('Refetch'),
+                ),
+              ])
           ],
         ),
       ),
@@ -272,8 +283,8 @@ class FormExample extends HookWidget {
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                    content: Text(
-                        'Submitted: ${data["name"]} / ${data["email"]}')),
+                    content:
+                        Text('Submitted: ${data["name"]} / ${data["email"]}')),
               );
             },
         []);
@@ -432,6 +443,102 @@ class RoadmapHooksExample extends HookWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class StatefulAndBuilderExample extends StatefulWidget {
+  const StatefulAndBuilderExample({super.key});
+
+  @override
+  State<StatefulAndBuilderExample> createState() =>
+      _StatefulAndBuilderExampleState();
+}
+
+class _StatefulAndBuilderExampleState extends State<StatefulAndBuilderExample> {
+  int _counter = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Stateful & Builder')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          const Text(
+            'This is a standard StatefulWidget. Below are parts using hooks via HookBuilder.',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () => setState(() => _counter++),
+            child: Text('Stateful Counter: $_counter'),
+          ),
+          const Divider(height: 48),
+          const Text('HookBuilder Example:'),
+          HookBuilder(
+            builder: (context) {
+              // Now we can use hooks inside this builder!
+              final hookCounter = useState(0);
+              return Column(
+                children: [
+                  Text('HookBuilder Counter: ${hookCounter.value}'),
+                  ElevatedButton(
+                    onPressed: () => hookCounter.value++,
+                    child: const Text('Increment Hook State'),
+                  ),
+                ],
+              );
+            },
+          ),
+          const Divider(height: 48),
+          const Text('StatefulHookWidget Example:'),
+          const MyStatefulHookWidget(),
+        ],
+      ),
+    );
+  }
+}
+
+class MyStatefulHookWidget extends StatefulHookWidget {
+  const MyStatefulHookWidget({super.key});
+
+  @override
+  State<MyStatefulHookWidget> createState() => _MyStatefulHookWidgetState();
+}
+
+class _MyStatefulHookWidgetState extends State<MyStatefulHookWidget> {
+  int _standardState = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    // We can use hooks directly here because it's a StatefulHookWidget!
+    final hookState = useState(0);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text('Standard State: $_standardState'),
+            Text('Hook State: ${hookState.value}'),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => setState(() => _standardState++),
+                  child: const Text('Incr Standard'),
+                ),
+                ElevatedButton(
+                  onPressed: () => hookState.value++,
+                  child: const Text('Incr Hook'),
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

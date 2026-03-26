@@ -2,8 +2,24 @@
 
 A lightweight and simple open-source Flutter hooks framework inspired by `flutter_hooks` and `React Hooks`.
 
-## Features
+### HookBuilder
 
+Need hooks in a regular `StatelessWidget` or `StatefulWidget`? Use `HookBuilder`:
+
+```dart
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: HookBuilder(
+      builder: (context) {
+        final state = useState(0);
+        return Center(child: Text('${state.value}'));
+      },
+    ),
+  );
+}
+```
+
+## Features Deep Dive
 Provides building blocks to compose reusable behavior and state logic.
 
 ### Standard Hooks
@@ -36,7 +52,9 @@ Provides building blocks to compose reusable behavior and state logic.
 - `useForm`: A robust, uncontrolled form controller pattern for reactive form state handling and validation without heavy internal boilerplate. Easily registers form fields, controls submission loading, and automatically renders validation errors.
 - `useAnimationController`: Creates an `AnimationController` seamlessly. Automatically provides a `TickerProvider` to the hook behind the scenes, mimicking the natural Flutter `vsync` requirement without needing Stateful widget mixins.
 - `useQuery`: An advanced, React-Query influenced hook designed exclusively for fetching HTTP REST API logic. Completely tracks cache states like `isLoading`, `isFetching`, `data`, `error` and explicit `refetch()` commands globally.
-- `useMutation`: The counterpart to `useQuery`, designed to handle POST/PUT updates natively exposing an `isMutating` state. Provides `onSuccess`, `onError`, and `onMutate` bindings automatically!
+- `useMutation`: The counterpart to `useQuery`, designed to handle POST/PUT updates natively exposing an `isMutating` state. Provides `onSuccess`, `onError`,- **🔄 Query & Mutations**: `useQuery`, `useMutation`, `useSubscription` — built-in support for REST or GraphQL-like data fetching.
+- **🖼️ UI & Layout**: `useTheme`, `useMediaQuery`, `useAppLifecycleState`.
+- **🏗️ Support Everywhere**: Use hooks in `HookWidget`, `StatefulHookWidget`, or via `HookBuilder`.
 - `useSubscription`: Tailored heavily toward bidirectional flows like WebSockets and GraphQL subscriptions. Automatically exposes the identical cache structures to queries but updates continuously via a native Dart `Stream` backing.
 
 ## Getting started

@@ -31,8 +31,7 @@ class _StateHookState<T> extends HookState<ValueNotifier<T>, _StateHook<T>> {
   @override
   void initHook() {
     super.initHook();
-    _notifier = ValueNotifier<T>(hook.initialData)
-      ..addListener(_listener);
+    _notifier = ValueNotifier<T>(hook.initialData)..addListener(_listener);
   }
 
   void _listener() {
@@ -128,10 +127,7 @@ T useMemoized<T>(T Function() valueBuilder, [List<Object?>? keys]) {
 }
 
 class _MemoizedHook<T> extends Hook<T> {
-  const _MemoizedHook({
-    required this.valueBuilder,
-    super.keys,
-  });
+  const _MemoizedHook({required this.valueBuilder, super.keys});
 
   final T Function() valueBuilder;
 

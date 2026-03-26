@@ -20,16 +20,16 @@ class _AppLifecycleStateHook extends Hook<AppLifecycleState> {
   _AppLifecycleStateHookState createState() => _AppLifecycleStateHookState();
 }
 
-class _AppLifecycleStateHookState 
-    extends HookState<AppLifecycleState, _AppLifecycleStateHook> 
+class _AppLifecycleStateHookState
+    extends HookState<AppLifecycleState, _AppLifecycleStateHook>
     with WidgetsBindingObserver {
-  
   late AppLifecycleState _state;
 
   @override
   void initHook() {
     super.initHook();
-    _state = WidgetsBinding.instance.lifecycleState ?? AppLifecycleState.resumed;
+    _state =
+        WidgetsBinding.instance.lifecycleState ?? AppLifecycleState.resumed;
     WidgetsBinding.instance.addObserver(this);
   }
 

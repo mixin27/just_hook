@@ -54,11 +54,9 @@ PaginationState<T> usePagination<T>({
   int initialPage = 1,
   List<Object?>? keys,
 }) {
-  return use(_PaginationHook<T>(
-    fetcher: fetcher,
-    initialPage: initialPage,
-    keys: keys,
-  ));
+  return use(
+    _PaginationHook<T>(fetcher: fetcher, initialPage: initialPage, keys: keys),
+  );
 }
 
 class _PaginationHook<T> extends Hook<PaginationState<T>> {
@@ -75,7 +73,8 @@ class _PaginationHook<T> extends Hook<PaginationState<T>> {
   _PaginationHookState<T> createState() => _PaginationHookState<T>();
 }
 
-class _PaginationHookState<T> extends HookState<PaginationState<T>, _PaginationHook<T>> {
+class _PaginationHookState<T>
+    extends HookState<PaginationState<T>, _PaginationHook<T>> {
   List<T> _items = [];
   bool _isLoading = false;
   bool _hasMore = true;
