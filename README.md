@@ -33,6 +33,7 @@ Provides building blocks to compose reusable behavior and state logic.
 ### Domain-Specific Hooks
 
 - `usePagination`: Easily handle typical infinite-scrolling scenarios. Manages data fetching, appending, refresh, and loading states automatically.
+- `useForm`: A robust, uncontrolled form controller pattern for reactive form state handling and validation without heavy internal boilerplate. Easily registers form fields, controls submission loading, and automatically renders validation errors.
 
 ## Getting started
 

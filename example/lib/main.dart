@@ -27,7 +27,8 @@ class MyHookPage extends HookWidget {
 
     // Advanced search hook automatically gives controller and string text
     final search = useSearch(initialText: 'Hooked Search');
-    final debouncedSearch = useDebounced(search.text, const Duration(milliseconds: 500));
+    final debouncedSearch =
+        useDebounced(search.text, const Duration(milliseconds: 500));
 
     // Controller hooks
     final focusNode = useFocusNode();
@@ -79,7 +80,8 @@ class MyHookPage extends HookWidget {
               Text('You typed: ${search.text}',
                   style: const TextStyle(fontWeight: FontWeight.bold)),
               Text('Debounced: $debouncedSearch',
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.blue)),
               const Divider(height: 48),
               Text('useStream Example:',
                   style: Theme.of(context).textTheme.titleLarge),
@@ -111,9 +113,20 @@ class MyHookPage extends HookWidget {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (c) => const PaginationExample()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (c) => const PaginationExample()));
                 },
                 child: const Text('View Pagination Example'),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (c) => const FormExample()));
+                },
+                child: const Text('View Form Example'),
               ),
             ],
           ),
@@ -127,17 +140,91 @@ class MyHookPage extends HookWidget {
   }
 }
 
+class FormExample extends HookWidget {
+  const FormExample({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final form = useForm();
+    final nameController = form.register('name', validators: [
+      (value) => value == null || value.isEmpty ? 'Name is required' : null,
+      (value) => value != null && value.length < 3 ? 'Name too short' : null,
+    ]);
+
+    final emailController = form.register('email', validators: [
+      (value) => value == null || value.isEmpty ? 'Email is required' : null,
+      (value) => value != null && !value.contains('@') ? 'Invalid email' : null,
+    ]);
+
+    final onSubmit = useMemoized(
+        () => (Map<String, String> data) async {
+              await Future.delayed(const Duration(seconds: 2));
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text(
+                        'Submitted: \${data["name"]} / \${data["email"]}')),
+              );
+            },
+        []);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Form Hook')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'Name',
+                errorText: form.errors['name'],
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                errorText: form.errors['email'],
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: form.isSubmitting ? null : () => form.submit(onSubmit),
+              child: form.isSubmitting
+                  ? const CircularProgressIndicator()
+                  : const Text('Submit'),
+            ),
+            if (!form.isValid && !form.isSubmitting)
+              const Padding(
+                padding: EdgeInsets.only(top: 16.0),
+                child: Text('Please fix errors.',
+                    style: TextStyle(color: Colors.red)),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class PaginationExample extends HookWidget {
   const PaginationExample({super.key});
 
   @override
   Widget build(BuildContext context) {
     // Generate some fake data
-    final fetchDummyData = useMemoized(() => (int page) async {
-      await Future.delayed(const Duration(seconds: 1));
-      if (page >= 5) return <String>[]; // Stop after 5 pages
-      return List.generate(15, (i) => 'Item \${(page - 1) * 15 + i + 1}');
-    }, []);
+    final fetchDummyData = useMemoized(
+        () => (int page) async {
+              await Future.delayed(const Duration(seconds: 1));
+              if (page >= 5) return <String>[]; // Stop after 5 pages
+              return List.generate(
+                  15, (i) => 'Item \${(page - 1) * 15 + i + 1}');
+            },
+        []);
 
     final pagination = usePagination<String>(
       fetcher: fetchDummyData,
